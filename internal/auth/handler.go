@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"go/adv-demo/configs"
+	"go/adv-demo/pkg/request"
 	"go/adv-demo/pkg/response"
 	"net/http"
 )
@@ -23,7 +24,11 @@ func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
 }
 func (handler *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println(handler.Config.Auth.Secret)
+		body, err := request.HandleBody[LoginRequest](&w, req)
+		if err != nil {
+			return
+		}
+		fmt.Println(body)
 		data := LoginResponse{
 			Token: "123",
 		}
@@ -32,6 +37,10 @@ func (handler *AuthHandler) Login() http.HandlerFunc {
 }
 func (handler *AuthHandler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("Register")
+		body, err := request.HandleBody[RegisterRequest](&w, req)
+		if err != nil {
+			return
+		}
+		fmt.Println(body)
 	}
 }
