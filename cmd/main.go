@@ -5,6 +5,8 @@ import (
 	"go/adv-demo/configs"
 	"go/adv-demo/internal/auth"
 	"go/adv-demo/internal/link"
+	"go/adv-demo/internal/user"
+	"go/adv-demo/migrations"
 	"go/adv-demo/pkg/db"
 	"go/adv-demo/pkg/middleware"
 	"net/http"
@@ -16,18 +18,22 @@ func main() {
 	db := db.NewDb(conf)
 	router := http.NewServeMux()
 
-	// Repositorites
+	migrations.Migrate(db)
+
 	linkRepository := link.NewLinkRepository(db)
 
-	// Handler
+	userRepository := user.NewUserRepository(db)
+
+	authService := auth.NewAuthService(userRepository)
+
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
-		Config: conf,
+		Config:      conf,
+		AuthService: authService,
 	})
 	link.NewLinkHandler(router, link.LinkHandlerDeps{
 		LinkRepository: linkRepository,
 	})
 
-	// Middlewares
 	stack := middleware.Chain(middleware.CORS, middleware.Logging)
 
 	server := http.Server{

@@ -1,13 +1,14 @@
-package main
+package migrations
 
 import (
-	"go/adv-demo/configs"
 	"go/adv-demo/internal/link"
+	"go/adv-demo/internal/user"
 	"go/adv-demo/pkg/db"
 )
 
-func main() {
-	conf := configs.LoadConfig()
-	db := db.NewDb(conf)
-	db.AutoMigrate(&link.Link{})
+func Migrate(db *db.Db) {
+	err := db.AutoMigrate(&link.Link{}, &user.User{})
+	if err != nil {
+		panic(err)
+	}
 }
